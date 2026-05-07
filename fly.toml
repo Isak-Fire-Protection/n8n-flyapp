@@ -1,0 +1,56 @@
+app = 'n8n-isak-fp'
+primary_region = 'sin'
+kill_signal = 'SIGTERM'
+kill_timeout = '2m0s'
+
+[build]
+  image = 'n8nio/n8n:2.19.5'
+
+[env]
+  N8N_HOST = 'n8n-isak-fp.fly.dev'
+  WEBHOOK_URL = 'https://n8n-isak-fp.fly.dev'
+  GENERIC_TIMEZONE = 'Asia/Manila'
+  DB_TYPE = 'postgresdb'
+  DB_POSTGRESDB_DATABASE = 'neondb'
+  DB_POSTGRESDB_USER = 'neondb_owner'
+  # DB_POSTGRESDB_SSL_CA_FILE = '/home/node/.n8n/prod-ca-2021.crt'
+  N8N_DEFAULT_BINARY_DATA_MODE = 'filesystem'
+  N8N_FORMDATA_FILE_SIZE_MAX = '400'
+  N8N_HIRING_BANNER_ENABLED = 'false'
+  N8N_METRICS = 'true'
+  N8N_PROXY_HOPS = '1'
+  NODES_EXCLUDE = '["n8n-nodes-base.localFileTrigger", "n8n-nodes-base.readWriteFile"]'
+  EXECUTIONS_DATA_PRUNE = 'true'
+  EXECUTIONS_DATA_MAX_AGE = '168'
+  EXECUTIONS_DATA_PRUNE_MAX_COUNT = '10000'
+  QUEUE_HEALTH_CHECK_ACTIVE = 'true'
+  TINI_SUBREAPER = 'true'
+
+[http_service]
+  internal_port = 5678
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'requests'
+    hard_limit = 200
+    soft_limit = 100
+
+[[mounts]]
+  source = 'n8n_isak_fp_volume'
+  destination = '/home/node/.n8n'
+  auto_extend_size_threshold = 90
+  auto_extend_size_increment = '1GB'
+  auto_extend_size_limit = '10GB'
+  scheduled_snapshots = false
+
+[[vm]]
+  size = 'shared-cpu-2x'
+  memory_mb = 2048
+
+[metrics]
+  port = 5678
+  path = '/metrics'
